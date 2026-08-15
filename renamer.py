@@ -5,13 +5,18 @@ import parsing
 import platform_utils
 
 
+def zero_pad_number(number: int, maximum_number: int) -> str:
+    padding_length = len(str(maximum_number))
+    return str(number).zfill(padding_length)
+
+
 def find_season_directory(root_directory_path: Path) -> List[Tuple[Path, int]]:
     season_directories = []
     for entry in root_directory_path.iterdir():
         if not entry.is_dir():
             continue
 
-        match = parsing.SEASON_DIR_PATTERN.search(entry.name)
+        match = parsing.SEASON_NUM_PATTERNS.search(entry.name)
         if match:
             season_number = int(match.group(1))
             season_directories.append((entry, season_number))
@@ -47,7 +52,7 @@ def rename_season_directory(
 def try_extract_episode_numbers(filenames: List[str], series_name: str) -> List[int]:
     episode_numbers = []
     for filename in filenames:
-        ep_num = parsing.extract_episode_number(filename, series_name)
+        ep_num = parsing.extract_episode_num(filename, series_name)
         if ep_num is not None:
             episode_numbers.append(ep_num)
     return episode_numbers
@@ -70,7 +75,7 @@ def rename_season_directory_files(
     max_episode = max(episode_numbers)
 
     for filename in filenames:
-        episode_number = parsing.extract_episode_number(filename, series_name)
+        episode_number = parsing.extract_episode_num(filename, series_name)
         if episode_number is None:
             print(f"Skipping file without episode number: '{filename}'")
             continue
@@ -114,7 +119,7 @@ def rename_root_directory_files(
     maximum_episode_number = max(episode_numbers)
 
     for filename in filenames:
-        episode_number = parsing.extract_episode_number(filename, series_name)
+        episode_number = parsing.extract_episode_num(filename, series_name)
         if episode_number is None:
             print(f"Skipping file without episode number: '{filename}'")
             continue
