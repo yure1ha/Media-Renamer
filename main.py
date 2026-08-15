@@ -1,8 +1,8 @@
 import argparse
 from pathlib import Path
-from typing import Optional
 
 import cli
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Rename series files and directories.")
@@ -14,7 +14,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    directory_path: Optional[Path] = None
+    directory_path: Path | None = None
     if args.directory_path:
         possible_path = Path(args.directory_path)
         if possible_path.is_dir():

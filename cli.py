@@ -1,8 +1,7 @@
 from pathlib import Path
-from typing import List, Optional, Tuple
 
 import rename_log
-import renamer
+import series_renamer
 
 
 def ask_yes_no(prompt: str) -> bool:
@@ -13,7 +12,7 @@ def ask_yes_no(prompt: str) -> bool:
         print("Enter 'Y' or 'N'.")
 
 
-def interactive_mode(directory_path: Optional[Path]) -> None:
+def interactive_mode(directory_path: Path | None) -> None:
     while True:
         while directory_path is None:
             user_input = input("Directory Path: ").strip()
@@ -42,20 +41,20 @@ def interactive_mode(directory_path: Optional[Path]) -> None:
         if ask_yes_no("Undo Previous Rename"):
             rename_log.undo_rename(directory_path, dry_run)
 
-        season_directories = renamer.find_season_directory(directory_path)
-        renamed: List[Tuple[str, str]] = []
+        season_directories = series_renamer.find_season_directory(directory_path)
+        renamed: list[tuple[str, str]] = []
 
         if season_directories:
             print(f"Found season directories: {[p.name for p, _ in season_directories]}")
             for season_directory_path, season_number in season_directories:
-                updated_path = renamer.rename_season_directory(season_directory_path, season_number, renamed, dry_run)
-                if not renamer.rename_season_directory_files(
+                updated_path = series_renamer.rename_season_directory(season_directory_path, season_number, renamed, dry_run)
+                if not series_renamer.rename_season_directory_files(
                         rename_series_name, (updated_path, season_number), series_name, renamed, dry_run
                 ):
                     print("No episodes were renamed in season directory.")
         else:
             print("No season directories found, attempting to rename files in root directory.")
-            if not renamer.rename_root_directory_files(
+            if not series_renamer.rename_root_directory_files(
                     directory_path, rename_series_name, series_name, renamed, dry_run
             ):
                 print("No episodes were renamed in root directory.")

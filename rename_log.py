@@ -1,13 +1,13 @@
 import json
 from pathlib import Path
-from typing import List, Tuple
 
 import platform_utils
+
 
 RENAME_LOG_FILE = "rename_log.json"
 
 
-def save_rename_log(rename_log: List[Tuple[str, str]], root_directory_path: Path, dry_run: bool) -> None:
+def save_rename_log(rename_log: list[tuple[str, str]], root_directory_path: Path, dry_run: bool) -> None:
     log_path = root_directory_path / RENAME_LOG_FILE
     if dry_run:
         print("[Dry Run] Skipping saving rename log.")
@@ -34,7 +34,7 @@ def undo_rename(root_directory_path: Path, dry_run: bool) -> None:
     try:
         with log_path.open("r") as log_file:
             rename_log_entries = json.load(log_file)
-        rename_log: List[Tuple[str, str]] = [
+        rename_log: list[tuple[str, str]] = [
             (str(original_path), str(new_path)) for original_path, new_path in rename_log_entries
         ]
     except Exception as error:
