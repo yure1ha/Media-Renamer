@@ -1,6 +1,7 @@
 from pathlib import Path
 
-import parsing
+import models
+import series_scanner
 
 
 class SeriesRenamer:
@@ -8,72 +9,61 @@ class SeriesRenamer:
         self.root_dir = root_dir
         self.series_name = series_name
         self.dry_run = dry_run
+        self.scanner = series_scanner.SeriesScanner(root_dir=self.root_dir)
 
-    def season_dirs(self) -> dict[Path, int]:
-        season_dirs = {}
+    EPISODE_NAME_FORMAT = "{series_name} [S{season_num}E{episode_num}]{suffix}"
+    SEASON_NAME_FORMAT  = "{series_name} [S{season_num}]"
 
-        for item in self.root_dir.iterdir():
-            if not item.is_dir():
+    def run(self) -> None:
+        self._execute([*self._plan_episode_renames(), *self._plan_season_renames()])
+
+    def _plan_episode_renames(self) -> list[models.Rename]:
+        renames = []
+
+        for season in self.scanner.seasons:
+            for episode in season.episodes:
+                new_name = self.EPISODE_NAME_FORMAT.format(
+                    series_name=self.series_name,
+                    season_num=season.num,
+                    episode_num=self.zero_pad(episode.num, self.scanner.max_episode_num),
+                    suffix=episode.path.suffix
+                )
+
+                renames.append(models.Rename(
+                    old_path=episode.path,
+                    new_path=episode.path.with_name(new_name)
+                ))
+
+        return renames
+
+    def _plan_season_renames(self) -> list[models.Rename]:
+        renames = []
+
+        for season in self.scanner.seasons:
+            new_name = self.SEASON_NAME_FORMAT.format(
+                series_name=self.series_name,
+                season_num=season.num
+            )
+
+            renames.append(models.Rename(
+                old_path=season.path,
+                new_path=season.path.with_name(new_name)
+            ))
+
+        return renames
+
+    def _execute(self, renames: list[models.Rename]) -> None:
+        for rename in renames:
+            if not rename.needs_rename:
                 continue
 
-            season_num = parsing.extract_season_num(item)
+            print(f"Renaming '{rename.old_path}' -> '{rename.new_path}'")
 
-            if season_num is not None:
-                season_dirs[item] = season_num
+            if self.dry_run:
+                continue
 
-        return season_dirs
-
-    def rename_season_dirs(self) -> None:
-        for season_path, season_num in self.season_dirs.items():
-            new_season_path = season_path.with_name(f"Season {season_num}")
-
-            if new_season_path != season_path:
-                print(f"Renaming: '{season_path}' -> '{new_season_path}'")
-
-                if not self.dry_run:
-                    season_path.rename(new_season_path)
-
-    def find_max_episode_num(self) -> int:
-        episode_nums = []
-
-        for season_path in self.season_dirs.keys():
-            for episode in season_path.iterdir():
-                if not episode.is_file():
-                    continue
-
-                episode_num = parsing.extract_episode_num(episode)
-
-                if episode_num is not None:
-                    episode_nums.append(episode_num)
-
-        return max(episode_nums) if episode_nums else 0
-
-
-    def rename_episodes(self) -> None:
-        max_episode_num = self.find_max_episode_num()
-
-        for season_path, season_num in self.season_dirs.items():
-            for episode_path in season_path.iterdir():
-                if not episode_path.is_file():
-                    continue
-
-                episode_num = parsing.extract_episode_num(episode_path)
-
-                if episode_num is None:
-                    continue
-
-                padded_episode_num = self.zero_pad(episode_num, max_episode_num)
-
-                new_episode_name = f"{self.series_name} [S{season_num}E{padded_episode_num}]{episode_path.suffix}"
-                new_episode_path = episode_path.with_name(new_episode_name)
-
-                if new_episode_path != episode_path:
-                    print(f"Renaming: '{episode_path}' -> '{new_episode_path}'")
-
-                    if not self.dry_run:
-                        episode_path.rename(new_episode_path)
+            rename.old_path.rename(rename.new_path)
 
     @staticmethod
     def zero_pad(num: int, max_num: int) -> str:
-        padding_length = len(str(max_num))
-        return str(num).zfill(padding_length)
+        return str(num).zfill(len(str(max_num)))
