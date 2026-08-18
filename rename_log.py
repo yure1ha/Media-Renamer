@@ -1,68 +1,53 @@
 import json
 from pathlib import Path
 
-import platform_utils
+import models
 
 
-RENAME_LOG_FILE = "rename_log.json"
+class RenameLog:
+    RENAME_LOG = "rename_log.json"
 
+    def __init__(self, root_dir: Path, dry_run: bool) -> None:
+        if not root_dir.is_dir():
+            raise NotADirectoryError(f"[ERROR] {root_dir} is not a valid directory")
 
-def save_rename_log(rename_log: list[tuple[str, str]], root_directory_path: Path, dry_run: bool) -> None:
-    log_path = root_directory_path / RENAME_LOG_FILE
-    if dry_run:
-        print("[Dry Run] Skipping saving rename log.")
-        return
+        self.root_dir = root_dir
+        self.dry_run = dry_run
+        self.rename_log: Path = self.root_dir / self.RENAME_LOG
+        self.entries: list[models.Rename] = []
 
-    try:
-        with log_path.open("w") as f:
-            json.dump(rename_log, f, indent=2)
-    except Exception as error:
-        print(f"Error saving rename log: {error}")
+    def record(self, rename: models.Rename) -> None:
+        self.entries.append(rename)
 
+    def save(self) -> None:
+        if self.dry_run:
+            print("[DRY RUN] Skipping rename log")
+            return
 
-def undo_rename(root_directory_path: Path, dry_run: bool) -> None:
-    log_path = root_directory_path / RENAME_LOG_FILE
+        try:
+            with self.rename_log.open("w", encoding="utf-8") as f:
+                data = [
+                    (rename.old_path.as_posix(), rename.new_path.as_posix())
+                    for rename in self.entries
+                ]
 
-    if not log_path.is_file():
-        print("No rename log found. Cannot undo rename.")
-        return
+                json.dump(data, f, indent=2, ensure_ascii=False)
 
-    if dry_run:
-        print("[Dry Run] Undo not performed.")
-        return
+        except Exception as e:
+            print(f"[ERROR] Failed to save rename log to '{self.rename_log}': {e}")
 
-    try:
-        with log_path.open("r") as log_file:
-            rename_log_entries = json.load(log_file)
-        rename_log: list[tuple[str, str]] = [
-            (str(original_path), str(new_path)) for original_path, new_path in rename_log_entries
-        ]
-    except Exception as error:
-        print(f"Error reading rename log: {error}")
-        return
+    def load(self) -> list[models.Rename]:
+        if not self.rename_log.is_file():
+            print("[ERROR] No rename log found")
+            return []
 
-    restored_files = []
+        try:
+            with self.rename_log.open("r", encoding="utf-8") as f:
+                return [models.Rename(
+                    old_path=Path(old_path),
+                    new_path=Path(new_path))
+                    for old_path, new_path in json.load(f)]
 
-    for original_path_string, new_path_string in reversed(rename_log):
-        original_path = Path(original_path_string)
-        new_path = Path(new_path_string)
-        if new_path.exists():
-            print(f"Restoring '{new_path}' to '{original_path}'")
-            try:
-                new_path.rename(original_path)
-                platform_utils.macos_hide_extension(original_path)
-                restored_files.append(original_path)
-            except Exception as error:
-                print(f"Error restoring file: {error}")
-
-    try:
-        log_path.unlink()
-    except Exception as error:
-        print(f"Error deleting rename log file: {error}")
-
-    if restored_files:
-        print("\n\nRestored Files:\n")
-        for restored_file_path in restored_files:
-            print(restored_file_path.name)
-            print(restored_file_path)
-            print()
+        except Exception as e:
+            print(f"[ERROR] Failed to read rename log at '{self.rename_log}': {e}")
+            return []

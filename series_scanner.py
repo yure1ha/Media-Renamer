@@ -7,6 +7,9 @@ import parsing
 
 class SeriesScanner:
     def __init__(self, root_dir: Path):
+        if not root_dir.is_dir():
+            raise NotADirectoryError(f"[ERROR] {root_dir} is not a valid directory")
+
         self.root_dir = root_dir
 
     @cached_property

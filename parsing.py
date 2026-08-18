@@ -1,6 +1,7 @@
 import re
 from pathlib import Path
 
+
 EPISODE_NUM_PATTERNS: list[re.Pattern] = [
     re.compile(r"""
         \b                      # Word boundary
