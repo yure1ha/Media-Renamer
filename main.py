@@ -1,28 +1,40 @@
-import argparse
-from pathlib import Path
-from typing import Optional
+from src import cli
+from src.series_renamer import SeriesRenamer
 
-import cli
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Rename series files and directories.")
-    parser.add_argument(
-        "directory_path",
-        nargs="?",
-        type=str,
-        help="Root directory path containing the series"
-    )
-    args = parser.parse_args()
+    root_dir = None
+    name = None
 
-    directory_path: Optional[Path] = None
-    if args.directory_path:
-        possible_path = Path(args.directory_path)
-        if possible_path.is_dir():
-            directory_path = possible_path
-        else:
-            print(f"Invalid Path: '{possible_path}'")
+    while True:
+        if not root_dir:
+            root_dir = cli.get_root_dir()
 
-    cli.interactive_mode(directory_path)
+        if not name:
+            name = cli.get_series_name()
+
+        dry_run = cli.is_dry_run()
+        undo_rename = cli.is_undo_rename()
+
+        renamer = SeriesRenamer(
+            root_dir=root_dir,
+            series_name=name,
+            dry_run=dry_run,
+            undo_rename=undo_rename
+        )
+
+        renamer.run()
+
+        run_again = cli.is_run_again()
+        if not run_again:
+            print("\nExiting...")
+            print("\nProcess Complete\n")
+            break
+
+        use_same_dir = cli.is_same_dir()
+        if not use_same_dir:
+            root_dir = None
+            name = None
 
 
 if __name__ == "__main__":
