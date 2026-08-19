@@ -1,16 +1,13 @@
 import json
 from pathlib import Path
 
-import models
+from src import models
 
 
 class RenameLog:
     RENAME_LOG = "rename_log.json"
 
     def __init__(self, root_dir: Path, dry_run: bool) -> None:
-        if not root_dir.is_dir():
-            raise NotADirectoryError(f"[ERROR] {root_dir} is not a valid directory")
-
         self.root_dir = root_dir
         self.dry_run = dry_run
         self.rename_log: Path = self.root_dir / self.RENAME_LOG
@@ -21,7 +18,7 @@ class RenameLog:
 
     def save(self) -> None:
         if self.dry_run:
-            print("[DRY RUN] Skipping rename log")
+            print("[DRY RUN] Skipping rename log\n")
             return
 
         try:
@@ -34,11 +31,14 @@ class RenameLog:
                 json.dump(data, f, indent=2, ensure_ascii=False)
 
         except Exception as e:
-            print(f"[ERROR] Failed to save rename log to '{self.rename_log}': {e}")
+            print(
+                f"[ERROR] Failed to save rename log to '{self.rename_log}': "
+                f"{e}\n")
+            return
 
     def load(self) -> list[models.Rename]:
         if not self.rename_log.is_file():
-            print("[ERROR] No rename log found")
+            print("[ERROR] No rename log found\n")
             return []
 
         try:
@@ -49,5 +49,7 @@ class RenameLog:
                     for old_path, new_path in json.load(f)]
 
         except Exception as e:
-            print(f"[ERROR] Failed to read rename log at '{self.rename_log}': {e}")
+            print(
+                f"[ERROR] Failed to read rename log at '{self.rename_log}': "
+                f"{e}\n")
             return []
