@@ -60,7 +60,7 @@ SEASON_NUM_PATTERNS: list[re.Pattern] = [
 def build_unmarked_episode_pattern(series_name: str) -> re.Pattern:
     words = [word for word in re.split(r"[\W_]+", series_name) if word]
     escaped_words = [re.escape(word) for word in words]
-    series_name_pattern = r"[\W_]+".join(escaped_words)
+    series_name_pattern = r"[\W_]*".join(escaped_words)
 
     return re.compile(rf"""
         \b                      # Word boundary
@@ -96,9 +96,11 @@ def extract_episode_num(target: str | Path) -> int | None:
     return None
 
 
-def extract_unmarked_episode_num(target: str, series_name: str) -> int | None:
+def extract_unmarked_episode_num(target: str | Path, series_name: str) -> int | None:
+    target_name = Path(target).name
+
     pattern = build_unmarked_episode_pattern(series_name)
-    match = pattern.search(target)
+    match = pattern.search(target_name)
 
     if match:
         return int(match.group("episode"))

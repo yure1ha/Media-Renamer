@@ -1,4 +1,5 @@
 from functools import cached_property
+from itertools import chain
 from pathlib import Path
 
 from src import models
@@ -6,12 +7,22 @@ from src import parsing
 
 
 class SeriesScanner:
-    def __init__(self, root_dir: Path):
+    def __init__(self, root_dir: Path, series_name: str) -> None:
         self.root_dir = root_dir
+        self.series_name = series_name
 
     @cached_property
     def max_episode_num(self) -> int:
-        return max((episode.num for season in self.seasons for episode in season.episodes), default=0)
+        episodes = chain(
+            (episode.num for episode in self.seasonless_episodes),
+            (episode.num for season in self.seasons for episode in season.episodes),
+        )
+
+        return max(episodes, default=0)
+
+    @cached_property
+    def seasonless_episodes(self) -> list[models.Episode]:
+        return self._get_episodes(self.root_dir)
 
     @cached_property
     def seasons(self) -> list[models.Season]:
@@ -33,8 +44,7 @@ class SeriesScanner:
 
         return seasons
 
-    @staticmethod
-    def _get_episodes(season_dir: Path) -> list[models.Episode]:
+    def _get_episodes(self, season_dir: Path) -> list[models.Episode]:
         episodes = []
 
         for episode in season_dir.iterdir():
@@ -43,6 +53,17 @@ class SeriesScanner:
 
             episode_num = parsing.extract_episode_num(episode)
             if episode_num is None:
+                try:
+                    episode_num = parsing.extract_unmarked_episode_num(episode, self.series_name)
+
+                except Exception as e:
+                    print(
+                        f"[ERROR] Failed to extra episode number from '{episode}'"
+                        f": {e}\n")
+                    continue
+
+            if episode_num is None:
+                print(f"[WARNING] No episode number found in '{episode}'\n")
                 continue
 
             episodes.append(models.Episode(
