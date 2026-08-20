@@ -7,11 +7,13 @@ class Episode:
     path: Path
     num: int
 
+
 @dataclass
 class Season:
     path: Path
     num: int
     episodes: list[Episode]
+
 
 @dataclass
 class Rename:
@@ -21,6 +23,7 @@ class Rename:
     @property
     def needs_rename(self) -> bool:
         return self.new_path != self.old_path
+
 
 @dataclass
 class CLIArgs:

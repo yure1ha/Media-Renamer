@@ -7,9 +7,12 @@ from src import parsing
 
 
 class SeriesScanner:
+    SKIPPED_FILENAMES: set[str] = {".DS_Store", "rename_log.json"}
+
     def __init__(self, root_dir: Path, series_name: str) -> None:
         self.root_dir = root_dir
         self.series_name = series_name
+        self.skipped_files: set[Path] = {self.root_dir / name for name in self.SKIPPED_FILENAMES}
 
     @cached_property
     def max_episode_num(self) -> int:
@@ -48,6 +51,9 @@ class SeriesScanner:
         episodes = []
 
         for episode in season_dir.iterdir():
+            if episode in self.skipped_files:
+                continue
+
             if not episode.is_file():
                 continue
 
