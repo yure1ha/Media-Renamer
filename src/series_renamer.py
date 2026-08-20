@@ -10,11 +10,11 @@ class SeriesRenamer:
     SEASONLESS_EPISODE_NAME_FORMAT = "{series_name} [E{episode_num}]{suffix}"
     SEASON_NAME_FORMAT             = "{series_name} [S{season_num}]"
 
-    def __init__(self, root_dir: Path, series_name: str, dry_run: bool, undo_rename: bool) -> None:
+    def __init__(self, root_dir: Path, series_name: str, undo_rename: bool, dry_run: bool) -> None:
         self.root_dir = root_dir
         self.series_name = series_name
-        self.dry_run = dry_run
         self.undo_rename = undo_rename
+        self.dry_run = dry_run
         self.scanner = SeriesScanner(root_dir=self.root_dir, series_name=self.series_name)
         self.rename_log = RenameLog(root_dir=self.root_dir, dry_run=self.dry_run)
 

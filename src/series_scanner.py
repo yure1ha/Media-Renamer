@@ -58,12 +58,12 @@ class SeriesScanner:
 
                 except Exception as e:
                     print(
-                        f"[ERROR] Failed to extra episode number from '{episode}'"
-                        f": {e}\n")
+                        f"\n[ERROR] Failed to extract episode number from '{episode}'"
+                        f": {e}")
                     continue
 
             if episode_num is None:
-                print(f"[WARNING] No episode number found in '{episode}'\n")
+                print(f"\n[WARNING] No episode number found in '{episode}'")
                 continue
 
             episodes.append(models.Episode(

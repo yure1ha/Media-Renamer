@@ -1,58 +1,51 @@
-import shlex
+import argparse
 from pathlib import Path
 
-
-def get_root_dir() -> Path:
-    root_dir = input("\nEnter Path: ").strip()
-
-    if not root_dir:
-        raise ValueError("[ERROR] No path provided\n")
-
-    try:
-        tokens = shlex.split(root_dir)
-
-    except ValueError as e:
-        raise ValueError(f"[ERROR] Could not parse path '{root_dir}': {e}\n")
-
-    if len(tokens) != 1:
-        raise ValueError("[ERROR] Enter a single path\n")
-
-    root_dir_path = Path(tokens[0])
-
-    if not root_dir_path.is_dir():
-        raise NotADirectoryError(
-            f"[ERROR] '{root_dir}' is not a valid directory\n"
-        )
-
-    return Path(root_dir_path).expanduser().resolve()
+from src.models import CLIArgs
 
 
-def get_series_name() -> str:
-    name = input("Enter Series Name: ")
-    return name
+def parse() -> CLIArgs:
+    parser = argparse.ArgumentParser(
+        description="Batch rename TV series"
+    )
 
+    parser.add_argument(
+        "root_dir",
+        type=Path,
+        help="Target directory to rename",
+    )
 
-def ask_yes_no(prompt: str) -> bool:
-    while True:
-        yes_no = input(f"{prompt} [Y/N]: ").strip().lower()
+    parser.add_argument(
+        "series_name",
+        type=str,
+        help="Target series name",
+    )
 
-        if yes_no not in ("y", "n"):
-            print("[ERROR] Enter Y or N\n")
+    parser.add_argument(
+        "-d",
+        "--dry-run",
+        action="store_true",
+        help="Simulate renaming without making changes",
+    )
 
-        return yes_no == "y"
+    parser.add_argument(
+        "-u",
+        "--undo",
+        action="store_true",
+        help="Undo the previous rename operation",
+    )
 
+    args = parser.parse_args()
 
-def is_dry_run() -> bool:
-    return ask_yes_no("Dry Run?")
+    root_dir: Path = args.root_dir
+    cleaned_path: Path = root_dir.expanduser().resolve()
 
+    if not cleaned_path.is_dir():
+        parser.error(f"[ERROR] {cleaned_path} is not a valid directory")
 
-def is_undo_rename() -> bool:
-    return ask_yes_no("Undo Rename?")
-
-
-def is_run_again() -> bool:
-    return ask_yes_no("Run Again?")
-
-
-def is_same_dir() -> bool:
-    return ask_yes_no("Use Same Directory?")
+    return CLIArgs(
+        root_dir=cleaned_path,
+        series_name=args.series_name,
+        undo_rename=args.undo,
+        dry_run=args.dry_run,
+    )

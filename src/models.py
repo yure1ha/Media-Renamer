@@ -21,3 +21,10 @@ class Rename:
     @property
     def needs_rename(self) -> bool:
         return self.new_path != self.old_path
+
+@dataclass
+class CLIArgs:
+    root_dir: Path
+    series_name: str
+    undo_rename: bool
+    dry_run: bool
