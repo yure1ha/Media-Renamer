@@ -28,3 +28,4 @@ class CLIArgs:
     series_name: str
     undo_rename: bool
     dry_run: bool
+    verbose: bool

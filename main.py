@@ -9,6 +9,7 @@ def main() -> None:
         series_name=args.series_name,
         undo_rename=args.undo_rename,
         dry_run=args.dry_run,
+        verbose=args.verbose,
     )
 
     renamer.run()

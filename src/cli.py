@@ -35,6 +35,13 @@ def parse() -> CLIArgs:
         help="Undo the previous rename operation",
     )
 
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Print verbose output",
+    )
+
     args = parser.parse_args()
 
     root_dir: Path = args.root_dir
@@ -48,4 +55,5 @@ def parse() -> CLIArgs:
         series_name=args.series_name,
         undo_rename=args.undo,
         dry_run=args.dry_run,
+        verbose=args.verbose,
     )

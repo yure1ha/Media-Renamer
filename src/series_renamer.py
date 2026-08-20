@@ -10,11 +10,12 @@ class SeriesRenamer:
     SEASONLESS_EPISODE_NAME_FORMAT = "{series_name} [E{episode_num}]{suffix}"
     SEASON_NAME_FORMAT             = "{series_name} [S{season_num}]"
 
-    def __init__(self, root_dir: Path, series_name: str, undo_rename: bool, dry_run: bool) -> None:
+    def __init__(self, root_dir: Path, series_name: str, undo_rename: bool, dry_run: bool, verbose: bool) -> None:
         self.root_dir = root_dir
         self.series_name = series_name
         self.undo_rename = undo_rename
         self.dry_run = dry_run
+        self.verbose = verbose
         self.scanner = SeriesScanner(root_dir=self.root_dir, series_name=self.series_name)
         self.rename_log = RenameLog(root_dir=self.root_dir, dry_run=self.dry_run)
 
@@ -110,7 +111,9 @@ class SeriesRenamer:
                 print(f"\n[WARNING] Destination '{entry.old_path} already exists")
                 continue
 
-            undo_renames.append(models.Rename(entry.old_path, entry.new_path))
+            undo_renames.append(models.Rename(
+                old_path=entry.old_path,
+                new_path=entry.new_path))
 
         return undo_renames
 
@@ -124,14 +127,15 @@ class SeriesRenamer:
                 skipped.append(rename.old_path.as_posix())
                 continue
 
-            print(f"\n[RENAME] '{rename.old_path}' -> '{rename.new_path}'")
+            if self.verbose:
+                print(f"\n[RENAME] '{rename.old_path}' -> '{rename.new_path}'")
 
             if not self.dry_run:
                 try:
                     rename.old_path.rename(rename.new_path)
                     self.rename_log.record(models.Rename(
-                        rename.old_path,
-                        rename.new_path)
+                        old_path=rename.old_path,
+                        new_path=rename.new_path)
                     )
 
                 except Exception as e:
@@ -153,7 +157,8 @@ class SeriesRenamer:
                 skipped.append(undo.new_path.as_posix())
                 continue
 
-            print(f"\n[UNDO] Reverting '{undo.new_path}' -> '{undo.old_path}'")
+            if self.verbose:
+                print(f"\n[UNDO] Reverting '{undo.new_path}' -> '{undo.old_path}'")
 
             if not self.dry_run:
                 try:
