@@ -2,20 +2,20 @@ from dataclasses import dataclass
 from pathlib import Path
 
 
-@dataclass
+@dataclass(frozen=True)
 class Episode:
     path: Path
     num: int
 
 
-@dataclass
+@dataclass(frozen=True)
 class Season:
     path: Path
     num: int
     episodes: list[Episode]
 
 
-@dataclass
+@dataclass(frozen=True)
 class Rename:
     old_path: Path
     new_path: Path
@@ -25,7 +25,7 @@ class Rename:
         return self.new_path != self.old_path
 
 
-@dataclass
+@dataclass(frozen=True)
 class CLIArgs:
     root_dir: Path
     series_name: str

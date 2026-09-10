@@ -32,7 +32,7 @@ def parse() -> CLIArgs:
         "-u",
         "--undo",
         action="store_true",
-        help="Undo the previous rename operation",
+        help="Undo previous rename operation",
     )
 
     parser.add_argument(

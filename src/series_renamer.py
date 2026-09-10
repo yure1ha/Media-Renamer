@@ -133,10 +133,7 @@ class SeriesRenamer:
             if not self.dry_run:
                 try:
                     rename.old_path.rename(rename.new_path)
-                    self.rename_log.record(models.Rename(
-                        old_path=rename.old_path,
-                        new_path=rename.new_path)
-                    )
+                    self.rename_log.record(rename)
 
                 except Exception as e:
                     print(f"\n[ERROR] Failed to rename '{rename.old_path}': {e}")
