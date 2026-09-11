@@ -1,7 +1,6 @@
 import re
 from pathlib import Path
 
-
 EPISODE_NUM_PATTERNS: list[re.Pattern] = [
     re.compile(r"""
         \b                      # Word boundary
@@ -96,7 +95,8 @@ def extract_episode_num(target: str | Path) -> int | None:
     return None
 
 
-def extract_unmarked_episode_num(target: str | Path, series_name: str) -> int | None:
+def extract_unmarked_episode_num(target: str | Path,
+                                 series_name: str) -> int | None:
     target_name = Path(target).name
 
     pattern = build_unmarked_episode_pattern(series_name)

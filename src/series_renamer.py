@@ -6,18 +6,21 @@ from src.series_scanner import SeriesScanner
 
 
 class SeriesRenamer:
-    SEASONED_EPISODE_NAME_FORMAT   = "{series_name} [S{season_num}E{episode_num}]{suffix}"
+    SEASONED_EPISODE_NAME_FORMAT = "{series_name} [S{season_num}E{episode_num}]{suffix}"
     SEASONLESS_EPISODE_NAME_FORMAT = "{series_name} [E{episode_num}]{suffix}"
-    SEASON_NAME_FORMAT             = "{series_name} [S{season_num}]"
+    SEASON_NAME_FORMAT = "{series_name} [S{season_num}]"
 
-    def __init__(self, root_dir: Path, series_name: str, undo_rename: bool, dry_run: bool, verbose: bool) -> None:
+    def __init__(self, root_dir: Path, series_name: str, undo_rename: bool,
+                 dry_run: bool, verbose: bool) -> None:
         self.root_dir = root_dir
         self.series_name = series_name
         self.undo_rename = undo_rename
         self.dry_run = dry_run
         self.verbose = verbose
-        self.scanner = SeriesScanner(root_dir=self.root_dir, series_name=self.series_name)
-        self.rename_log = RenameLog(root_dir=self.root_dir, dry_run=self.dry_run)
+        self.scanner = SeriesScanner(root_dir=self.root_dir,
+                                     series_name=self.series_name)
+        self.rename_log = RenameLog(root_dir=self.root_dir,
+                                    dry_run=self.dry_run)
 
     def run(self) -> None:
         skipped = []
@@ -34,7 +37,7 @@ class SeriesRenamer:
 
         seasonless_episode_renames = self._plan_seasonless_episode_renames()
         seasoned_episode_renames = self._plan_seasoned_episode_renames()
-        season_renames  = self._plan_season_renames()
+        season_renames = self._plan_season_renames()
 
         s, f = self._execute_renames(
             seasonless_episode_renames
@@ -108,7 +111,8 @@ class SeriesRenamer:
 
         for entry in entries:
             if entry.old_path.exists():
-                print(f"\n[WARNING] Destination '{entry.old_path} already exists")
+                print(
+                    f"\n[WARNING] Destination '{entry.old_path} already exists")
                 continue
 
             undo_renames.append(models.Rename(
@@ -117,7 +121,8 @@ class SeriesRenamer:
 
         return undo_renames
 
-    def _execute_renames(self, renames: list[models.Rename]) -> tuple[list[str], list[str]]:
+    def _execute_renames(self, renames: list[models.Rename]) -> tuple[
+        list[str], list[str]]:
         skipped = []
         failed = []
 
@@ -136,7 +141,8 @@ class SeriesRenamer:
                     self.rename_log.record(rename)
 
                 except Exception as e:
-                    print(f"\n[ERROR] Failed to rename '{rename.old_path}': {e}")
+                    print(
+                        f"\n[ERROR] Failed to rename '{rename.old_path}': {e}")
                     failed.append(rename.old_path.as_posix())
 
         if not self.dry_run:
@@ -144,7 +150,8 @@ class SeriesRenamer:
 
         return skipped, failed
 
-    def _execute_undo_renames(self, undo_renames: list[models.Rename]) -> tuple[list[str], list[str]]:
+    def _execute_undo_renames(self, undo_renames: list[models.Rename]) -> \
+    tuple[list[str], list[str]]:
         skipped = []
         failed = []
 
@@ -155,7 +162,8 @@ class SeriesRenamer:
                 continue
 
             if self.verbose:
-                print(f"\n[UNDO] Reverting '{undo.new_path}' -> '{undo.old_path}'")
+                print(
+                    f"\n[UNDO] Reverting '{undo.new_path}' -> '{undo.old_path}'")
 
             if not self.dry_run:
                 try:

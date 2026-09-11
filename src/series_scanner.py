@@ -17,7 +17,8 @@ class SeriesScanner:
     def max_episode_num(self) -> int:
         episodes = chain(
             (episode.num for episode in self.seasonless_episodes),
-            (episode.num for season in self.seasons for episode in season.episodes),
+            (episode.num for season in self.seasons for episode in
+             season.episodes),
         )
 
         return max(episodes, default=0)
@@ -59,7 +60,8 @@ class SeriesScanner:
             episode_num = parsing.extract_episode_num(episode)
             if episode_num is None:
                 try:
-                    episode_num = parsing.extract_unmarked_episode_num(episode, self.series_name)
+                    episode_num = parsing.extract_unmarked_episode_num(episode,
+                                                                       self.series_name)
 
                 except Exception as e:
                     print(
