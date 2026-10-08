@@ -32,14 +32,14 @@ def parse() -> CLIArgs:
         "-u",
         "--undo",
         action="store_true",
-        help="Undo previous rename operation",
+        help="Undo previous rename",
     )
 
     parser.add_argument(
         "-v",
         "--verbose",
         action="store_true",
-        help="Print verbose output",
+        help="Enable verbose output",
     )
 
     args = parser.parse_args()
