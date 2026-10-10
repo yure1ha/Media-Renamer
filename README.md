@@ -10,9 +10,9 @@ cd <path/to/project>
 python3 main.py <root_dir> <series_name> [-d] [-u] [-v]
 ```
 
-- **Dry Run:** `[--dry-run] [-d]` Simulate renaming without making changes
-- **Undo Rename:** `[--undo] [-u]` Undo previous rename
-- **Verbose:** `[--verbose] [-v]` Enable verbose output
+- **Dry Run:** `[--dry-run] [-d]` Simulate renaming without making changes.
+- **Undo Rename:** `[--undo] [-u]` Undo previous rename.
+- **Verbose:** `[--verbose] [-v]` Enable verbose output.
 
 ### Supported Formats
 
