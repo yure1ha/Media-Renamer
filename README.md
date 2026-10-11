@@ -1,7 +1,7 @@
-# Series Renamer
+# Media Renamer
 
-A CLI tool to batch rename local TV series into the format `[Series Name][S#]` for seasons and `[Series Name][S#][E#]`
-for episodes
+A CLI tool for batch renaming local TV series into the format `[Series Name][S#]` for seasons and
+`[Series Name][S#][E#]` for episodes
 
 ## Usage
 
@@ -16,12 +16,16 @@ python3 main.py <root_dir> <series_name> [-d] [-u] [-v]
 
 ### Supported Formats
 
-| Style            | Examples                                 | Extracts            |
-|------------------|------------------------------------------|---------------------|
-| Season + Episode | `S01E05`, `s1e5`, `S01.E05`, `S01 - E05` | Season 1, Episode 5 |
-| Episode Keyword  | `Episode 5`, `Ep05`, `E5`                | Episode 5           |
-| Season Keyword   | `Season 1`, `S01`                        | Season 1            |
-| Unmarked         | `Series Name - 05`                       | Episode 5           |
+| Style            | Examples                                  | Extracts            |
+|------------------|-------------------------------------------|---------------------|
+| Season + Episode | `S01E05`, `s1e5`, `S01.E05`, `Season1E05` | Season 1, Episode 5 |
+| Episode Keyword  | `Episode 5`, `Ep05`, `E5`                 | Episode 5           |
+| Season Keyword   | `Season 1`, `S01`                         | Season 1            |
+| Unmarked         | `Series Name - 05`                        | Episode 5           |
+
+Metadata in filenames, e.g. resolution or codec, is automatically stripped:
+
+`Series.Name.S01E05.1080p.HEVC.mkv --> Series Name [S1][E05].mkv`
 
 ## Architecture
 
