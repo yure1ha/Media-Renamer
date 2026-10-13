@@ -1,7 +1,7 @@
 # Media Renamer
 
 A CLI tool for batch renaming local TV series into the format `[Series Name][S#]` for seasons and
-`[Series Name][S#][E#]` for episodes
+`[Series Name][S#][E#]` for episodes.
 
 ## Usage
 
